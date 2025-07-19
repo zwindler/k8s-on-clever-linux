@@ -1,0 +1,6 @@
+[tools]
+cfssl = "latest"
+etcd = "latest"
+kubectl = "latest"
+python = "latest"
+helm = latest

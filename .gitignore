@@ -1,0 +1,12 @@
+kube.config
+
+# Kubernetes cluster files
+bin/
+certs/
+etcd-data/
+logs/
+*.conf
+*.yaml
+*.txt
+bootstrap-token*
+setup-worker-node.sh
