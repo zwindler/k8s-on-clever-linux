@@ -20,7 +20,7 @@ Deploy the repo on clever cloud with a "linux" type app. Again, if you want to u
 
 Note: you can probably just use app-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.cleverapps.io default clever cloud URL but I haven't tried.
 
-I met a slight restriction. In order to expose the self generated TLS encrypted api-server, you have to enable TCP redirection, which listens on port 4040 and exposes port 5332 on your clever cloud app URL.
+I met a slight restriction. In order to expose the self generated TLS encrypted api-server, you have to enable TCP redirection, which listens on port 4040 and exposes port 5684 (this port seems to be random) on your clever cloud app URL.
 
 ```bash
 clever tcp-redirs --app xxx_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -129,11 +129,11 @@ Server Version: v1.33.2
 
 Hurray!! We are running a Kubernetes control plane on Clever Cloud.
 
-You can also copy the admin.conf file locally, and change the `server: https://127.0.0.1:4040` to `server: https://k8soncleverlinux.zwindler.fr:5332` and it should work as well.
+You can also copy the admin.conf file locally, and change the `server: https://127.0.0.1:4040` to `server: https://k8soncleverlinux.zwindler.fr:5684` and it should work as well.
 
 ```bash
 $ kubectl cluster-info
-Kubernetes control plane is running at https://k8soncleverlinux.zwindler.fr:5332
+Kubernetes control plane is running at https://k8soncleverlinux.zwindler.fr:5684
 
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
@@ -183,7 +183,7 @@ set -e
 # Override these variables before running if the auto-detection is incorrect
 NODE_NAME_OVERRIDE=""  # Leave empty to use hostname, or set to override
 NODE_IP_OVERRIDE=""    # Leave empty to auto-detect, or set to override (e.g., "192.168.1.100")
-API_SERVER_ENDPOINT="https://xxxxxxxxxx.domain.org:5332"
+API_SERVER_ENDPOINT="https://xxxxxxxxxx.domain.org:5684"
 BOOTSTRAP_TOKEN="xxxxxx.xxxxxxxxxxxxxxxx"
 ...
 ```
@@ -236,6 +236,8 @@ kube-flannel   kube-flannel-ds-b65jg   1/1     Running   0              14m
 ## Known issues
 
 Since the external Node is NOT in clever cloud network, I'm having issues to make api-server communicate with the kubelet (not the other way around). api-server doesn't know "how" to contact the node to extract logs or port-forward or exec... This probably requires exposing publicly the kubelet (don't do this) or setting up a VPN (or use konnectivity?).
+
+Also, by recreating a new app, I discovered that the TCP redirection port is random... I'll need to make this configurable.
 
 ## Workarounds
 
