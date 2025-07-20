@@ -13,7 +13,7 @@ echo ""
 
 # Ensure required directories exist
 echo "📁 Creating required directories..."
-mkdir -p logs etcd-data bin certs
+mkdir -p logs etcd-data bin certs public
 
 # Step 1: Setup binaries and tools (heavy download, should be cached)
 echo "📦 Step 1: Setting up binaries..."

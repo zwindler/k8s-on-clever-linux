@@ -65,7 +65,7 @@ clever env set CC_WORKER_COMMAND_3 "bin/kube-scheduler --kubeconfig admin.conf"
 
 # Worker 4: HTTP server (from start-services.sh)
 echo "Setting up HTTP server worker..."
-clever env set CC_WORKER_COMMAND_4 "python3 -m http.server 8080 --bind 0.0.0.0"
+clever env set CC_WORKER_COMMAND_4 "python3 -m http.server 8080 --bind 0.0.0.0 --directory public"
 
 # Set restart policy (optional, defaults to on-failure)
 echo "Setting worker restart policy..."
