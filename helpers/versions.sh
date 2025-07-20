@@ -3,8 +3,9 @@
 # Display current version configuration
 set -e
 
-# Source environment variables
-source .env
+# Get script directory and source environment variables
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/.env"
 
 echo "=== Current Version Configuration ==="
 echo ""

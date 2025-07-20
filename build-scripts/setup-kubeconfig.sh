@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Setup kubeconfig for admin access
+set -e
+
+# Source environment variables
+source helpers/.env
+
+echo "=== Setting up kubeconfig ==="/bash
+
 # Setup kubeconfig for cluster access
 set -e
 

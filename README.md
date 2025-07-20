@@ -10,19 +10,38 @@ I'm using the "linux" app type (https://www.clever-cloud.com/developers/doc/appl
 
 I'm doing it just for fun and educational purposes. Don't use it. Even for personal use...
 
+## How does it work?
+
+This project works the same way my tutorial [demystifions-kubernetes](https://github.com/zwindler/demystifions-kubernetes) works.
+
+This projects:
+- downloads all kubernetes control plane components
+- creates a bunch of certs for components authentication
+- launches them all as processes with only the necessary options
+
+In clever cloud, this is done in multiple phases.
+
+- **Build phase** (`.mise-tasks/build`): Downloads binaries, generates certificates, sets up static configuration
+  - **Cached** across app restarts
+  - Only runs when code changes
+
+- **Run phase** (`.mise-tasks/run`): Generates dynamic tokens and starts workers
+
 ## Installation
 
 ### 1. Setup Repository
 
-Just clone or copy this repository. If you want to access this remotely, change occurrences of the URL `k8soncleverlinux.zwindler.fr` to a domain you control.
+Just clone or copy this repository. 
 
 ### 2. Create a linux app using CLI or console
 
-**Important**: Before starting deployment, we need to configure a few things on the app.
+Create the app in clever cloud console (or using CLI) and point it to your repo.
 
-### 3. Configure Workers
+### 3. Configure Workers (Run Locally)
 
-Configure Clever Cloud workers on your local machine:
+All control plane processes are run in the background using a clever cloud feature called "workers". So we need to configure the app we just created to do just this.
+
+On you local machine:
 
 ```bash
 # Link to your Clever Cloud app
@@ -32,22 +51,16 @@ clever link <app_id>
 ./setup-clever-workers.sh
 ```
 
-This sets up 5 workers managed by systemd:
-- **Worker 0**: etcd database
-- **Worker 1**: kube-apiserver  
-- **Worker 2**: kube-controller-manager
-- **Worker 3**: kube-scheduler
-- **Worker 4**: HTTP server
+This script will:
+- 🌐 Configure domain settings (with defaults you can override)
+- 🔧 Set up 5 workers managed by systemd:
+  - **Worker 0**: etcd database
+  - **Worker 1**: kube-apiserver  
+  - **Worker 2**: kube-controller-manager
+  - **Worker 3**: kube-scheduler
+  - **Worker 4**: HTTP server
 
-### 4. Deploy
-
-If you want to use it remotely, add the domain in the app settings (this requires having access to a domain and DNS CNAME records).
-
-![](assets/domain.png)
-
-Note: you can probably just use app-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.cleverapps.io default clever cloud URL but I haven't tried.
-
-### 5. Setup TCP Redirection
+### 4. Setup TCP Redirection
 
 I met a slight restriction. In order to expose the self generated TLS encrypted api-server, you have to enable TCP redirection, which listens on port 4040 and exposes port 5684 (this port seems to be random) on your clever cloud app URL.
 
@@ -59,7 +72,27 @@ or from the console:
 
 ![](assets/tcp-redir.png)
 
-You can now start the app.
+### 2. Configure Domain
+
+Once we know WHICH port that is exposed externally, we can setup our domain.
+
+In my script I use `k8soncleverlinux.zwindler.fr` and port 5684, but you'll obviously need to modify it to your own values.
+
+You can configure it via environment variables:
+
+```bash
+# Set your custom domain and TCP port
+clever env set K8S_DOMAIN your-domain.com
+clever env set K8S_TCP_PORT 5684
+```
+
+If you want to use it remotely, add the domain in the app settings (this requires having access to a domain and DNS CNAME records).
+
+![](assets/domain.png)
+
+Note: you can probably just use app-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.cleverapps.io default clever cloud URL but I haven't tried.
+
+**You can now start the app.**
 
 ### 6. Monitor Deployment
 

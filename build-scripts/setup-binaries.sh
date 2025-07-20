@@ -4,7 +4,7 @@
 set -e
 
 # Source environment variables
-source .env
+source helpers/.env
 
 echo "=== Setting up Kubernetes binaries (v${K8S_VERSION}) ==="
 

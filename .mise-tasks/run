@@ -1,65 +1,37 @@
 #!/bin/bash
 
-# Main script to setup Kubernetes cluster using Clever Cloud workers
+# Run script for Kubernetes cluster - handles dynamic parts that run on each restart
 set -e
 
 # Source environment variables
-source .env
+source helpers/.env
 
-# Ensure required directories exist (needed for workers)
-echo "📁 Creating required directories..."
-mkdir -p logs etcd-data bin certs
-
-echo "🚀 Starting Kubernetes cluster setup..."
+echo "🚀 Starting Kubernetes cluster..."
 echo "Kubernetes version: $K8S_VERSION"
-echo "Run './versions.sh' to see all configured versions"
 echo ""
 echo "⚡ Using Clever Cloud workers for process management"
 echo "   Services are automatically managed by systemd"
+echo "   Static components (binaries, certs) were prepared during build phase"
 echo ""
 
-# Step 1: Setup binaries and tools
-echo "📦 Step 1: Setting up binaries..."
-./setup-binaries.sh
-
-echo ""
-
-# Step 2: Generate certificates
-echo "🔐 Step 2: Generating certificates..."
-./generate-certs.sh
+# Step 1: Generate bootstrap token (dynamic, changes on each restart)
+echo "🔑 Step 1: Generating bootstrap token..."
+./run-scripts/generate-bootstrap-token.sh
 
 echo ""
 
-# Step 3: Setup kubeconfig
-echo "⚙️  Step 3: Setting up kubeconfig..."
-./setup-kubeconfig.sh
+# Step 2: Setup RBAC for worker nodes (requires API server to be running)
+echo "🔒 Step 2: Setting up RBAC for worker nodes..."
+./run-scripts/setup-node-rbac.sh
 
 echo ""
 
-# Step 4: Setup RBAC for worker nodes
-echo "🔒 Step 4: Setting up RBAC for worker nodes..."
-./setup-node-rbac.sh
+# Step 3: Generate worker setup script (dynamic, includes fresh tokens)
+echo "📝 Step 3: Generating worker setup script..."
+./run-scripts/generate-worker-script.sh
 
 echo ""
-
-# Step 5: Generate bootstrap token
-echo "🔑 Step 5: Generating bootstrap token..."
-./generate-bootstrap-token.sh
-
-echo ""
-
-# Step 6: Generate kube-proxy certificates
-echo "🔐 Step 6: Generating kube-proxy certificates..."
-./generate-kubeproxy-certs.sh
-
-echo ""
-
-# Step 7: Generate worker setup script
-echo "📝 Step 7: Generating worker setup script..."
-./generate-worker-script.sh
-
-echo ""
-echo "✅ Kubernetes cluster setup complete!"
+echo "✅ Kubernetes cluster startup complete!"
 echo ""
 echo "🔧 Running with Clever Cloud workers:"
 echo "  • Worker 0: etcd database"
@@ -68,7 +40,7 @@ echo "  • Worker 2: kube-controller-manager"
 echo "  • Worker 3: kube-scheduler"
 echo "  • Worker 4: HTTP server"
 echo ""
-echo "� Monitor workers:"
+echo "📊 Monitor workers:"
 echo "  clever logs              # View all logs"
 echo "  clever logs --follow     # Follow logs in real-time"
 echo ""
@@ -83,8 +55,7 @@ echo "  bin/kubectl get nodes"
 echo "  bin/kubectl cluster-info"
 echo ""
 echo "⚙️  Configuration:"
-echo "  ./versions.sh                # Show current versions"
-echo "  Edit .env file to update versions"
+echo "  helpers/versions.sh          # Show current versions"
+echo "  Edit helpers/.env file to update versions"
 echo ""
-echo "✅ Setup complete! Workers are managed by Clever Cloud systemd."
-
+echo "✅ Startup complete! Workers are managed by Clever Cloud systemd."

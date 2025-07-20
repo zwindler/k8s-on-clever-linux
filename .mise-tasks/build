@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Build script for Kubernetes cluster - handles heavy setup that should be cached
+set -e
+
+# Source environment variables
+source helpers/.env
+
+echo "🏗️  Building Kubernetes cluster components..."
+echo "Kubernetes version: $K8S_VERSION"
+echo "Run 'helpers/versions.sh' to see all configured versions"
+echo ""
+
+# Ensure required directories exist
+echo "📁 Creating required directories..."
+mkdir -p logs etcd-data bin certs
+
+# Step 1: Setup binaries and tools (heavy download, should be cached)
+echo "📦 Step 1: Setting up binaries..."
+./build-scripts/setup-binaries.sh
+
+echo ""
+
+# Step 2: Generate certificates (should be cached unless certs need refresh)
+echo "🔐 Step 2: Generating certificates..."
+./build-scripts/generate-certs.sh
+
+echo ""
+
+# Step 3: Setup kubeconfig (depends on certificates)
+echo "⚙️  Step 3: Setting up kubeconfig..."
+./build-scripts/setup-kubeconfig.sh
+
+echo ""
+echo "✅ Build phase complete!"
+echo "   Binaries, certificates, and static configuration are ready"
+echo "   These components are cached and will survive app restarts"

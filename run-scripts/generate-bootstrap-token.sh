@@ -3,6 +3,9 @@
 # Generate bootstrap token for external worker nodes
 set -e
 
+# Source environment variables
+source helpers/.env
+
 echo "=== Generating bootstrap token for worker nodes ==="
 
 # Check if kubectl is available

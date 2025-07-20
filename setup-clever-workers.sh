@@ -28,6 +28,25 @@ fi
 
 echo "Setting up workers via clever CLI..."
 
+# First, configure domain settings (user should modify these as needed)
+echo ""
+echo "📝 Configuring domain settings..."
+echo "Setting default domain (change if needed):"
+echo "  K8S_DOMAIN=k8soncleverlinux.zwindler.fr"
+echo "  K8S_TCP_PORT=5684"
+echo ""
+echo "To use your own domain, run:"
+echo "  clever env set K8S_DOMAIN your-domain.com"
+echo "  clever env set K8S_TCP_PORT your-tcp-port"
+echo ""
+
+# Set default values that users can override
+clever env set K8S_DOMAIN "k8soncleverlinux.zwindler.fr"
+clever env set K8S_TCP_PORT "5684"
+
+echo ""
+echo "🔧 Setting up worker commands..."
+
 # Worker 0: etcd
 echo "Setting up etcd worker..."
 clever env set CC_WORKER_COMMAND_0 "etcd --data-dir etcd-data --client-cert-auth --cert-file=certs/admin.pem --key-file=certs/admin-key.pem --trusted-ca-file=certs/ca.pem --advertise-client-urls https://127.0.0.1:2379 --listen-client-urls https://127.0.0.1:2379"

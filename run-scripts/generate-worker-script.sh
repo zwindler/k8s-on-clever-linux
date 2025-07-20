@@ -4,7 +4,7 @@
 set -e
 
 # Source environment variables
-source .env
+source helpers/.env
 
 echo "=== Generating worker node setup script ==="
 echo "Versions:"
