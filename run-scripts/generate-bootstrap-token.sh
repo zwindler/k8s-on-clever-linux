@@ -6,6 +6,9 @@ set -e
 # Source environment variables
 source helpers/.env
 
+# For debugging purposes
+sleep 300
+
 echo "=== Generating bootstrap token for worker nodes ==="
 
 # Check if kubectl is available
