@@ -118,13 +118,15 @@ On you local machine:
 ```
 
 This script will:
-- 🌐 Configure domain settings (with defaults you can override)
-- 🔧 Set up 5 workers managed by systemd:
+- Configure domain settings (with defaults you can override)
+- Set up 5 workers managed by systemd:
   - **Worker 0**: etcd database
   - **Worker 1**: kube-apiserver  
   - **Worker 2**: kube-controller-manager
   - **Worker 3**: kube-scheduler
   - **Worker 4**: HTTP server
+
+See [clever-cloud.com/developers/doc/develop/workers/](https://www.clever-cloud.com/developers/doc/develop/workers/) 
 
 ### 6. You can now start the app.
 
