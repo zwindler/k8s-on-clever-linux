@@ -33,7 +33,7 @@ echo ""
 echo "📝 Configuring domain settings..."
 echo "Setting default domain (change if needed):"
 echo "  K8S_DOMAIN=k8soncleverlinux.zwindler.fr"
-echo "  K8S_TCP_PORT=5684"
+echo "  K8S_TCP_PORT=5131"
 echo ""
 echo "To use your own domain, run:"
 echo "  clever env set K8S_DOMAIN your-domain.com"
@@ -42,7 +42,7 @@ echo ""
 
 # Set default values that users can override
 clever env set K8S_DOMAIN "k8soncleverlinux.zwindler.fr"
-clever env set K8S_TCP_PORT "5684"
+clever env set K8S_TCP_PORT "5131"
 
 echo ""
 echo "🔧 Setting up worker commands..."

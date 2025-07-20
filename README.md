@@ -37,87 +37,6 @@ Just clone or copy this repository.
 
 Create the app in clever cloud console (or using CLI) and point it to your repo.
 
-### 3. Configure Workers (Run Locally)
-
-All control plane processes are run in the background using a clever cloud feature called "workers". So we need to configure the app we just created to do just this.
-
-On you local machine:
-
-```bash
-# Link to your Clever Cloud app
-clever link <app_id>
-
-# Configure workers for automatic process management
-./setup-clever-workers.sh
-```
-
-This script will:
-- 🌐 Configure domain settings (with defaults you can override)
-- 🔧 Set up 5 workers managed by systemd:
-  - **Worker 0**: etcd database
-  - **Worker 1**: kube-apiserver  
-  - **Worker 2**: kube-controller-manager
-  - **Worker 3**: kube-scheduler
-  - **Worker 4**: HTTP server
-
-### 4. Setup TCP Redirection
-
-I met a slight restriction. In order to expose the self generated TLS encrypted api-server, you have to enable TCP redirection, which listens on port 4040 and exposes port 5684 (this port seems to be random) on your clever cloud app URL.
-
-```bash
-clever tcp-redirs --app xxx_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-```
-
-or from the console:
-
-![](assets/tcp-redir.png)
-
-### 2. Configure Domain
-
-Once we know WHICH port that is exposed externally, we can setup our domain.
-
-In my script I use `k8soncleverlinux.zwindler.fr` and port 5684, but you'll obviously need to modify it to your own values.
-
-You can configure it via environment variables:
-
-```bash
-# Set your custom domain and TCP port
-clever env set K8S_DOMAIN your-domain.com
-clever env set K8S_TCP_PORT 5684
-```
-
-If you want to use it remotely, add the domain in the app settings (this requires having access to a domain and DNS CNAME records).
-
-![](assets/domain.png)
-
-Note: you can probably just use app-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.cleverapps.io default clever cloud URL but I haven't tried.
-
-**You can now start the app.**
-
-### 6. Monitor Deployment
-
-[Mise](https://mise.jdx.dev/registry.html) should install some dependencies (cfssl, etcd, kubectl, python) and the setup will complete. After less than a minute you should get :
-
-```
-...
-2025-07-19T13:16:48.479Z ✅ Kubernetes cluster setup complete!
-2025-07-19T13:16:48.479Z 🔧 Running with Clever Cloud workers:
-2025-07-19T13:16:48.479Z   • Worker 0: etcd database
-2025-07-19T13:16:48.479Z   • Worker 1: kube-apiserver
-2025-07-19T13:16:48.479Z   • Worker 2: kube-controller-manager
-2025-07-19T13:16:48.479Z   • Worker 3: kube-scheduler
-2025-07-19T13:16:48.479Z   • Worker 4: HTTP server
-...
-```
-
-Control plane is up and running.
-
-## Try the control plane
-
-As it is, the control plane in itself works, but we can't interact with it. 
-
-BUT we can SSH connect to the clever cloud "linux" instance and try to run some `kubectl` commands to see if it really works
-
 1. log into your terminal
 
 ```bash
@@ -154,7 +73,82 @@ Once this is done, a .clever.json file is created
 }
 ```
 
-You can now SSH to the instance
+### 3. Setup TCP Redirection
+
+I met a slight restriction. In order to expose the self generated TLS encrypted api-server, you have to enable TCP redirection, which listens on port 4040 and exposes port 5XXX (this port seems to be random) on your clever cloud app URL.
+
+```bash
+clever tcp-redirs add --namespace default
+Successfully added tcp redirection on port: 5131
+```
+
+or from the console:
+
+![](assets/tcp-redir.png)
+
+### 4. Configure Domain
+
+Once we know WHICH port that is exposed externally, we can setup our domain.
+
+In my script I use `k8soncleverlinux.zwindler.fr` and port 5131 (in my example), but you'll obviously need to modify it to your own values.
+
+You can configure it via environment variables:
+
+```bash
+# Set your custom domain and TCP port
+clever env set K8S_DOMAIN your-domain.com
+clever env set K8S_TCP_PORT 5131
+```
+
+If you want to use it remotely, add the domain in the app settings (this requires having access to a domain and DNS CNAME records).
+
+![](assets/domain.png)
+
+Note: you can probably just use app-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.cleverapps.io default clever cloud URL but I haven't tried.
+
+### 5. Configure Workers
+
+All control plane processes are run in the background using a clever cloud feature called "workers". So we need to configure the app we just created to do just this.
+
+On you local machine:
+
+```bash
+# Configure workers for automatic process management
+./setup-clever-workers.sh
+```
+
+This script will:
+- 🌐 Configure domain settings (with defaults you can override)
+- 🔧 Set up 5 workers managed by systemd:
+  - **Worker 0**: etcd database
+  - **Worker 1**: kube-apiserver  
+  - **Worker 2**: kube-controller-manager
+  - **Worker 3**: kube-scheduler
+  - **Worker 4**: HTTP server
+
+### 6. You can now start the app.
+
+[Mise](https://mise.jdx.dev/registry.html) should install some dependencies (cfssl, etcd, kubectl, python) and the setup will complete. After less than a minute you should get :
+
+```
+...
+2025-07-19T13:16:48.479Z ✅ Kubernetes cluster setup complete!
+2025-07-19T13:16:48.479Z 🔧 Running with Clever Cloud workers:
+2025-07-19T13:16:48.479Z   • Worker 0: etcd database
+2025-07-19T13:16:48.479Z   • Worker 1: kube-apiserver
+2025-07-19T13:16:48.479Z   • Worker 2: kube-controller-manager
+2025-07-19T13:16:48.479Z   • Worker 3: kube-scheduler
+2025-07-19T13:16:48.479Z   • Worker 4: HTTP server
+...
+```
+
+Control plane is up and running.
+
+## Try the control plane
+
+As it is, the control plane in itself works, but we can't interact with it. 
+
+BUT we can SSH connect to the clever cloud "linux" instance and try to run some `kubectl` commands to see if it really works
 
 ```bash
 $ clever ssh
@@ -183,9 +177,9 @@ generate-bootstrap-token.sh  setup-binaries.sh
 Set KUBECONFIG and try a `kubectl` command
 
 ```
-bas@yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy ~/app_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx $ export KUBECONFIG=admin.conf
+export KUBECONFIG=admin.conf
 
-bas@yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy ~/app_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx $ kubectl version
+kubectl version
 Client Version: v1.33.2
 Kustomize Version: v5.6.0
 Server Version: v1.33.2
@@ -193,11 +187,11 @@ Server Version: v1.33.2
 
 Hurray!! We are running a Kubernetes control plane on Clever Cloud.
 
-You can also copy the admin.conf file locally, and change the `server: https://127.0.0.1:4040` to `server: https://k8soncleverlinux.zwindler.fr:5684` and it should work as well.
+You can also copy the admin.conf file locally, and change the `server: https://127.0.0.1:4040` to `server: https://k8soncleverlinux.zwindler.fr:5131` and it should work as well.
 
 ```bash
 $ kubectl cluster-info
-Kubernetes control plane is running at https://k8soncleverlinux.zwindler.fr:5684
+Kubernetes control plane is running at https://k8soncleverlinux.zwindler.fr:5131
 
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
@@ -247,7 +241,7 @@ set -e
 # Override these variables before running if the auto-detection is incorrect
 NODE_NAME_OVERRIDE=""  # Leave empty to use hostname, or set to override
 NODE_IP_OVERRIDE=""    # Leave empty to auto-detect, or set to override (e.g., "192.168.1.100")
-API_SERVER_ENDPOINT="https://xxxxxxxxxx.domain.org:5684"
+API_SERVER_ENDPOINT="https://xxxxxxxxxx.domain.org:5131"
 BOOTSTRAP_TOKEN="xxxxxx.xxxxxxxxxxxxxxxx"
 ...
 ```
