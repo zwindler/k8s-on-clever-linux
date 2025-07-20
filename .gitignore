@@ -1,4 +1,5 @@
 kube.config
+.clever.json
 
 # Kubernetes cluster files
 bin/
