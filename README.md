@@ -12,13 +12,42 @@ I'm doing it just for fun and educational purposes. Don't use it. Even for perso
 
 ## Installation
 
+### 1. Setup Repository
+
 Just clone or copy this repository. If you want to access this remotely, change occurrences of the URL `k8soncleverlinux.zwindler.fr` to a domain you control.
 
-Deploy the repo on clever cloud with a "linux" type app. Again, if you want to use it remotely, add the domain in the app settings (this requires having access to a domain and DNS CNAME records).
+### 2. Create a linux app using CLI or console
+
+**Important**: Before starting deployment, we need to configure a few things on the app.
+
+### 3. Configure Workers
+
+Configure Clever Cloud workers on your local machine:
+
+```bash
+# Link to your Clever Cloud app
+clever link <app_id>
+
+# Configure workers for automatic process management
+./setup-clever-workers.sh
+```
+
+This sets up 5 workers managed by systemd:
+- **Worker 0**: etcd database
+- **Worker 1**: kube-apiserver  
+- **Worker 2**: kube-controller-manager
+- **Worker 3**: kube-scheduler
+- **Worker 4**: HTTP server
+
+### 4. Deploy
+
+If you want to use it remotely, add the domain in the app settings (this requires having access to a domain and DNS CNAME records).
 
 ![](assets/domain.png)
 
 Note: you can probably just use app-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.cleverapps.io default clever cloud URL but I haven't tried.
+
+### 5. Setup TCP Redirection
 
 I met a slight restriction. In order to expose the self generated TLS encrypted api-server, you have to enable TCP redirection, which listens on port 4040 and exposes port 5684 (this port seems to be random) on your clever cloud app URL.
 
@@ -30,19 +59,21 @@ or from the console:
 
 ![](assets/tcp-redir.png)
 
-By now, you can start the app.
+You can now start the app.
 
-[Mise](https://mise.jdx.dev/registry.html) should install some dependencies (cfssl, etcd, kubectl, python) and `./setup-binaries.sh` should do the rest. After less than a minute you should get :
+### 6. Monitor Deployment
+
+[Mise](https://mise.jdx.dev/registry.html) should install some dependencies (cfssl, etcd, kubectl, python) and the setup will complete. After less than a minute you should get :
 
 ```
 ...
-2025-07-19T13:16:48.474Z 🌐 Step 10: Starting additional services...
-2025-07-19T13:16:48.478Z === Starting additional services ===
-2025-07-19T13:16:48.478Z Starting HTTP server on port 8080...
-2025-07-19T13:16:48.478Z HTTP server started with PID: 2181
-2025-07-19T13:16:48.478Z ✓ Additional services started
-2025-07-19T13:16:48.478Z HTTP server available at: http://0.0.0.0:8080
 2025-07-19T13:16:48.479Z ✅ Kubernetes cluster setup complete!
+2025-07-19T13:16:48.479Z 🔧 Running with Clever Cloud workers:
+2025-07-19T13:16:48.479Z   • Worker 0: etcd database
+2025-07-19T13:16:48.479Z   • Worker 1: kube-apiserver
+2025-07-19T13:16:48.479Z   • Worker 2: kube-controller-manager
+2025-07-19T13:16:48.479Z   • Worker 3: kube-scheduler
+2025-07-19T13:16:48.479Z   • Worker 4: HTTP server
 ...
 ```
 

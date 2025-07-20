@@ -1,14 +1,21 @@
 #!/bin/bash
 
-# Main script to setup and run Kubernetes cluster
+# Main script to setup Kubernetes cluster using Clever Cloud workers
 set -e
 
 # Source environment variables
 source .env
 
+# Ensure required directories exist (needed for workers)
+echo "📁 Creating required directories..."
+mkdir -p logs etcd-data bin certs
+
 echo "🚀 Starting Kubernetes cluster setup..."
 echo "Kubernetes version: $K8S_VERSION"
 echo "Run './versions.sh' to see all configured versions"
+echo ""
+echo "⚡ Using Clever Cloud workers for process management"
+echo "   Services are automatically managed by systemd"
 echo ""
 
 # Step 1: Setup binaries and tools
@@ -29,52 +36,41 @@ echo "⚙️  Step 3: Setting up kubeconfig..."
 
 echo ""
 
-# Step 4: Start etcd
-echo "💾 Step 4: Starting etcd..."
-./start-etcd.sh
-
-echo ""
-
-# Step 5: Start control plane
-echo "🎛️  Step 5: Starting control plane..."
-./start-control-plane.sh
-
-echo ""
-
-# Step 6: Setup RBAC for worker nodes
-echo "🔒 Step 6: Setting up RBAC for worker nodes..."
+# Step 4: Setup RBAC for worker nodes
+echo "🔒 Step 4: Setting up RBAC for worker nodes..."
 ./setup-node-rbac.sh
 
 echo ""
 
-# Step 7: Generate bootstrap token
-echo "🔑 Step 7: Generating bootstrap token..."
+# Step 5: Generate bootstrap token
+echo "🔑 Step 5: Generating bootstrap token..."
 ./generate-bootstrap-token.sh
 
 echo ""
 
-# Step 8: Generate kube-proxy certificates
-echo "🔐 Step 8: Generating kube-proxy certificates..."
+# Step 6: Generate kube-proxy certificates
+echo "🔐 Step 6: Generating kube-proxy certificates..."
 ./generate-kubeproxy-certs.sh
 
 echo ""
 
-# Step 9: Generate worker setup script
-echo "📝 Step 9: Generating worker setup script..."
+# Step 7: Generate worker setup script
+echo "📝 Step 7: Generating worker setup script..."
 ./generate-worker-script.sh
-
-echo ""
-
-# Step 10: Start additional services
-echo "🌐 Step 10: Starting additional services..."
-./start-services.sh
 
 echo ""
 echo "✅ Kubernetes cluster setup complete!"
 echo ""
-echo "🔗 Available endpoints:"
-echo "  • Kubernetes API: https://127.0.0.1:4040"
-echo "  • HTTP Server: http://0.0.0.0:8080"
+echo "🔧 Running with Clever Cloud workers:"
+echo "  • Worker 0: etcd database"
+echo "  • Worker 1: kube-apiserver"
+echo "  • Worker 2: kube-controller-manager"
+echo "  • Worker 3: kube-scheduler"
+echo "  • Worker 4: HTTP server"
+echo ""
+echo "� Monitor workers:"
+echo "  clever logs              # View all logs"
+echo "  clever logs --follow     # Follow logs in real-time"
 echo ""
 echo "📋 To add worker nodes:"
 echo "  1. Copy the generated setup-worker-node.sh to your external worker node"
@@ -86,15 +82,9 @@ echo "🔍 Check cluster status:"
 echo "  bin/kubectl get nodes"
 echo "  bin/kubectl cluster-info"
 echo ""
-echo "📄 Check component logs:"
-echo "  ./logs.sh                    # Show log status"
-echo "  ./logs.sh tail <component>   # Follow logs"
-echo "  ./logs.sh errors             # Show recent errors"
-echo ""
 echo "⚙️  Configuration:"
 echo "  ./versions.sh                # Show current versions"
 echo "  Edit .env file to update versions"
-
-# Keep the script running
-wait
+echo ""
+echo "✅ Setup complete! Workers are managed by Clever Cloud systemd."
 
