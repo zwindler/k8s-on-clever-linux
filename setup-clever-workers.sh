@@ -1,14 +1,16 @@
 #!/bin/bash
 
-# Setup Clever Cloud workers to replace start-etcd.sh and start-control-plane.sh
+# Setup Clever Cloud workers to use individual wrapper scripts
 # 
 # ⚠️  IMPORTANT: This script should be run LOCALLY on your computer
-# It configures your Clever Cloud application to use workers instead of shell scripts.
+# It configures your Clever Cloud application to use simple wrapper scripts
+# instead of complex command lines with arguments for CC_WORKER_COMMAND_x
 #
 set -e
 
 echo "=== Setting up Clever Cloud workers for Kubernetes ==="
 echo "⚠️  This script configures your Clever Cloud app - run it locally!"
+echo "🔧 Using individual wrapper scripts instead of complex command lines"
 echo ""
 
 # Check if clever CLI is available
@@ -49,23 +51,23 @@ echo "🔧 Setting up worker commands..."
 
 # Worker 0: etcd
 echo "Setting up etcd worker..."
-clever env set CC_WORKER_COMMAND_0 "etcd --data-dir etcd-data --client-cert-auth --cert-file=certs/admin.pem --key-file=certs/admin-key.pem --trusted-ca-file=certs/ca.pem --advertise-client-urls https://127.0.0.1:2379 --listen-client-urls https://127.0.0.1:2379"
+clever env set CC_WORKER_COMMAND_0 "./run-scripts/start-etcd.sh"
 
 # Worker 1: kube-apiserver
 echo "Setting up kube-apiserver worker..."
-clever env set CC_WORKER_COMMAND_1 "bin/kube-apiserver --client-ca-file=certs/ca.pem --tls-cert-file=certs/admin.pem --tls-private-key-file=certs/admin-key.pem --enable-bootstrap-token-auth --service-account-key-file=certs/admin.pem --service-account-signing-key-file=certs/admin-key.pem --service-account-issuer=https://kubernetes.default.svc.cluster.local --etcd-cafile=certs/ca.pem --etcd-certfile=certs/admin.pem --etcd-keyfile=certs/admin-key.pem --etcd-servers=https://127.0.0.1:2379 --allow-privileged --authorization-mode=Node,RBAC --secure-port 4040"
+clever env set CC_WORKER_COMMAND_1 "./run-scripts/start-kube-apiserver.sh"
 
 # Worker 2: kube-controller-manager
 echo "Setting up kube-controller-manager worker..."
-clever env set CC_WORKER_COMMAND_2 "bin/kube-controller-manager --cluster-signing-cert-file=certs/ca.pem --cluster-signing-key-file=certs/ca-key.pem --service-account-private-key-file=certs/admin-key.pem --root-ca-file=certs/ca.pem --kubeconfig admin.conf --use-service-account-credentials --cluster-cidr=10.0.0.0/16 --allocate-node-cidrs=true"
+clever env set CC_WORKER_COMMAND_2 "./run-scripts/start-kube-controller-manager.sh"
 
 # Worker 3: kube-scheduler
 echo "Setting up kube-scheduler worker..."
-clever env set CC_WORKER_COMMAND_3 "bin/kube-scheduler --kubeconfig admin.conf"
+clever env set CC_WORKER_COMMAND_3 "./run-scripts/start-kube-scheduler.sh"
 
-# Worker 4: HTTP server (from start-services.sh)
+# Worker 4: HTTP server
 echo "Setting up HTTP server worker..."
-clever env set CC_WORKER_COMMAND_4 "python3 -m http.server 8080 --bind 0.0.0.0 --directory public"
+clever env set CC_WORKER_COMMAND_4 "./run-scripts/start-http-server.sh"
 
 # Set restart policy (optional, defaults to on-failure)
 echo "Setting worker restart policy..."
@@ -79,11 +81,11 @@ echo ""
 echo "✓ Clever Cloud workers configured!"
 echo ""
 echo "Workers that will be started by Clever Cloud:"
-echo "  Worker 0: etcd database"
-echo "  Worker 1: kube-apiserver" 
-echo "  Worker 2: kube-controller-manager"
-echo "  Worker 3: kube-scheduler"
-echo "  Worker 4: HTTP server on port 8080"
+echo "  Worker 0: ./run-scripts/start-etcd.sh"
+echo "  Worker 1: ./run-scripts/start-kube-apiserver.sh" 
+echo "  Worker 2: ./run-scripts/start-kube-controller-manager.sh"
+echo "  Worker 3: ./run-scripts/start-kube-scheduler.sh"
+echo "  Worker 4: ./run-scripts/start-http-server.sh"
 echo ""
 echo "All workers will:"
 echo "  - Restart automatically on failure"

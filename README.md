@@ -119,12 +119,14 @@ On you local machine:
 
 This script will:
 - Configure domain settings (with defaults you can override)
-- Set up 5 workers managed by systemd:
-  - **Worker 0**: etcd database
-  - **Worker 1**: kube-apiserver  
-  - **Worker 2**: kube-controller-manager
-  - **Worker 3**: kube-scheduler
-  - **Worker 4**: HTTP server
+- Set up 5 workers using individual wrapper scripts (instead of complex command lines):
+  - **Worker 0**: `./run-scripts/start-etcd.sh` - etcd database
+  - **Worker 1**: `./run-scripts/start-kube-apiserver.sh` - kube-apiserver  
+  - **Worker 2**: `./run-scripts/start-kube-controller-manager.sh` - kube-controller-manager
+  - **Worker 3**: `./run-scripts/start-kube-scheduler.sh` - kube-scheduler
+  - **Worker 4**: `./run-scripts/start-http-server.sh` - HTTP server
+
+**Note**: Each worker uses a simple wrapper script instead of complex `CC_WORKER_COMMAND_x` with arguments.
 
 See [clever-cloud.com/developers/doc/develop/workers/](https://www.clever-cloud.com/developers/doc/develop/workers/) 
 
