@@ -14,35 +14,23 @@ echo "   Services are automatically managed by systemd"
 echo "   Static components (binaries, certs) were prepared during build phase"
 echo ""
 
-# Step 1: Generate bootstrap token (dynamic, changes on each restart)
-echo "🔑 Step 1: Generating bootstrap token..."
-./run-scripts/generate-bootstrap-token.sh
+# Step 1: Start HTTP server for worker coordination
+echo "🌐 Starting HTTP server..."
+./run-scripts/start-http-server.sh
 
 echo ""
 
-# Step 2: Setup RBAC for worker nodes (requires API server to be running)
-echo "🔒 Step 2: Setting up RBAC for worker nodes..."
-./run-scripts/setup-node-rbac.sh
+
 
 echo ""
-
-# Step 3: Generate worker setup script (dynamic, includes fresh tokens)
-echo "📝 Step 3: Generating worker setup script..."
-./run-scripts/generate-worker-script.sh
-
+echo "✅ Kubernetes cluster is starting up!"
 echo ""
-echo "✅ Kubernetes cluster startup complete!"
-echo ""
-echo "🔧 Running with Clever Cloud workers:"
+echo "🔧 Control plane component should start, launched by Clever Cloud 'workers':"
 echo "  • Worker 0: etcd database"
 echo "  • Worker 1: kube-apiserver"
 echo "  • Worker 2: kube-controller-manager"
 echo "  • Worker 3: kube-scheduler"
-echo "  • Worker 4: HTTP server"
-echo ""
-echo "📊 Monitor workers:"
-echo "  clever logs              # View all logs"
-echo "  clever logs --follow     # Follow logs in real-time"
+echo "  • Worker 4: post-boot setup (bootstrap tokens, RBAC, worker scripts)"
 echo ""
 echo "📋 To add worker nodes:"
 echo "  1. Copy the generated setup-worker-node.sh to your external worker node"
@@ -57,5 +45,3 @@ echo ""
 echo "⚙️  Configuration:"
 echo "  helpers/versions.sh          # Show current versions"
 echo "  Edit helpers/.env file to update versions"
-echo ""
-echo "✅ Startup complete! Workers are managed by Clever Cloud systemd."

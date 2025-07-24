@@ -65,9 +65,10 @@ clever env set CC_WORKER_COMMAND_2 "./run-scripts/start-kube-controller-manager.
 echo "Setting up kube-scheduler worker..."
 clever env set CC_WORKER_COMMAND_3 "./run-scripts/start-kube-scheduler.sh"
 
-# Worker 4: HTTP server
-echo "Setting up HTTP server worker..."
-clever env set CC_WORKER_COMMAND_4 "./run-scripts/start-http-server.sh"
+# Worker 4: post-boot setup (bootstrap token, RBAC, worker script generation)
+# This worker handles the dynamic setup that needs the control plane to be running
+chmod +x run-scripts/post-boot.sh
+clever env set CC_WORKER_COMMAND_4 "run-scripts/post-boot.sh"
 
 # Set restart policy (optional, defaults to on-failure)
 echo "Setting worker restart policy..."
@@ -85,7 +86,7 @@ echo "  Worker 0: ./run-scripts/start-etcd.sh"
 echo "  Worker 1: ./run-scripts/start-kube-apiserver.sh" 
 echo "  Worker 2: ./run-scripts/start-kube-controller-manager.sh"
 echo "  Worker 3: ./run-scripts/start-kube-scheduler.sh"
-echo "  Worker 4: ./run-scripts/start-http-server.sh"
+echo "  Worker 4: ./run-scripts/run-scripts/post-boot.sh (bootstrap tokens, RBAC, worker scripts)"
 echo ""
 echo "All workers will:"
 echo "  - Restart automatically on failure"

@@ -3,6 +3,8 @@
 # Start kube-controller-manager
 set -e
 
+sleep 10  # Ensure API server is ready before starting controller manager
+
 echo "=== Starting kube-controller-manager ==="
 
 # Certificate options for controller manager

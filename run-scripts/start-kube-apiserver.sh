@@ -3,6 +3,8 @@
 # Start kube-apiserver
 set -e
 
+sleep 5  # Ensure etcd is ready before starting API server
+
 echo "=== Starting kube-apiserver ==="
 
 # Certificate options for API server
