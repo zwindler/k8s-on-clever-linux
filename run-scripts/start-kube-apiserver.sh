@@ -7,6 +7,9 @@ sleep 5  # Ensure etcd is ready before starting API server
 
 echo "=== Starting kube-apiserver ==="
 
+# Create logs directory if it doesn't exist
+mkdir -p logs
+
 # Certificate options for API server
 API_CERTS_OPTS="--client-ca-file=certs/ca.pem \
             --tls-cert-file=certs/admin.pem \
@@ -22,10 +25,11 @@ ETCD_OPTS="--etcd-cafile=certs/ca.pem \
            --etcd-servers=https://127.0.0.1:2379"
 
 # Start kube-apiserver
-echo "Starting kube-apiserver (quiet mode)..."
+echo "Starting kube-apiserver..."
+echo "Logs: logs/kube-apiserver.log"
 exec bin/kube-apiserver ${API_CERTS_OPTS} ${ETCD_OPTS} \
             --allow-privileged \
             --authorization-mode=Node,RBAC \
             --enable-bootstrap-token-auth \
             --secure-port 4040 \
-            --v=1
+            >> logs/kube-apiserver.log 2>&1
