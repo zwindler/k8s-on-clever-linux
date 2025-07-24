@@ -34,7 +34,6 @@ echo "📝 Generating worker setup script..."
 
 echo ""
 echo "✅ Dynamic setup complete!"
-echo "🔄 Worker will restart if needed..."
 
 # Keep the worker alive by waiting
 while true; do
