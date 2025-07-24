@@ -1,5 +1,5 @@
 [tools]
 cfssl = "latest"
 etcd = "latest"
-kubectl = "latest"
+kubectl = "1.33.3"
 helm = "latest"
