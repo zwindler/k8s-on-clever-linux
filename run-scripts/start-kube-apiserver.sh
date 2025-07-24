@@ -22,9 +22,10 @@ ETCD_OPTS="--etcd-cafile=certs/ca.pem \
            --etcd-servers=https://127.0.0.1:2379"
 
 # Start kube-apiserver
-echo "Starting kube-apiserver..."
+echo "Starting kube-apiserver (quiet mode)..."
 exec bin/kube-apiserver ${API_CERTS_OPTS} ${ETCD_OPTS} \
             --allow-privileged \
             --authorization-mode=Node,RBAC \
             --enable-bootstrap-token-auth \
-            --secure-port 4040
+            --secure-port 4040 \
+            --v=1

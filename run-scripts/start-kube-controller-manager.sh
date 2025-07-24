@@ -14,9 +14,10 @@ CONTROLLER_CERTS_OPTS="--cluster-signing-cert-file=certs/ca.pem \
             --root-ca-file=certs/ca.pem"
 
 # Start kube-controller-manager
-echo "Starting kube-controller-manager..."
+echo "Starting kube-controller-manager (quiet mode)..."
 exec bin/kube-controller-manager ${CONTROLLER_CERTS_OPTS} \
 --kubeconfig admin.conf \
 --use-service-account-credentials \
 --cluster-cidr=10.0.0.0/16 \
---allocate-node-cidrs=true
+--allocate-node-cidrs=true \
+--v=1
