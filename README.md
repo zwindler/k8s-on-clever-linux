@@ -25,7 +25,7 @@ In clever cloud, this is done in multiple phases.
   - **Cached** across app restarts
   - Only runs when code changes
 
-- **Run phase** (`.mise-tasks/run`): Generates dynamic tokens and starts workers
+- **Run phase** (`.mise-tasks/run`): starts workers (Kubernetes control plane components) in the backgrounds and a script to add workers
 
 ## Installation
 
@@ -100,6 +100,12 @@ clever env set K8S_DOMAIN your-domain.com
 clever env set K8S_TCP_PORT 5131
 ```
 
+If you want, you can also configure in advance the kubeconfig path variable
+
+```bash
+clever env set KUBECONFIG /home/bas/<app_id>/admin.conf
+```
+
 If you want to use it remotely, add the domain in the app settings (this requires having access to a domain and DNS CNAME records).
 
 ![](assets/domain.png)
@@ -124,7 +130,7 @@ This script will:
   - **Worker 1**: `./run-scripts/start-kube-apiserver.sh` - kube-apiserver  
   - **Worker 2**: `./run-scripts/start-kube-controller-manager.sh` - kube-controller-manager
   - **Worker 3**: `./run-scripts/start-kube-scheduler.sh` - kube-scheduler
-  - **Worker 4**: `./run-scripts/start-http-server.sh` - HTTP server
+  - **Worker 4**: `./run-scripts/post-boot.sh` - bootstrap tokens, RBAC, worker scripts
 
 **Note**: Each worker uses a simple wrapper script instead of complex `CC_WORKER_COMMAND_x` with arguments.
 
@@ -132,17 +138,11 @@ See [clever-cloud.com/developers/doc/develop/workers/](https://www.clever-cloud.
 
 ### 6. You can now start the app.
 
-[Mise](https://mise.jdx.dev/registry.html) should install some dependencies (cfssl, etcd, kubectl, python) and the setup will complete. After less than a minute you should get :
+[Mise](https://mise.jdx.dev/registry.html) should install some dependencies (`cfssl`, etcd, `kubectl`) and the setup will complete. After less than a minute you should get :
 
 ```
 ...
-2025-07-19T13:16:48.479Z ✅ Kubernetes cluster setup complete!
-2025-07-19T13:16:48.479Z 🔧 Running with Clever Cloud workers:
-2025-07-19T13:16:48.479Z   • Worker 0: etcd database
-2025-07-19T13:16:48.479Z   • Worker 1: kube-apiserver
-2025-07-19T13:16:48.479Z   • Worker 2: kube-controller-manager
-2025-07-19T13:16:48.479Z   • Worker 3: kube-scheduler
-2025-07-19T13:16:48.479Z   • Worker 4: HTTP server
+2025-07-19T13:16:48.479Z ✅ Dynamic setup complete!
 ...
 ```
 
@@ -180,10 +180,8 @@ generate-bootstrap-token.sh  setup-binaries.sh
 
 Set KUBECONFIG and try a `kubectl` command
 
-```
-export KUBECONFIG=admin.conf
-
-kubectl version
+```bash
+$ kubectl version
 Client Version: v1.33.2
 Kustomize Version: v5.6.0
 Server Version: v1.33.2
