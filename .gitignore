@@ -7,7 +7,6 @@ certs/
 etcd-data/
 logs/
 *.conf
-*.yaml
 *.txt
 bootstrap-token*
 setup-worker-node.sh
